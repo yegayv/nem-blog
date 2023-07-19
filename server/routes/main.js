@@ -28,11 +28,13 @@ router.get("", async (req, res) => {
       current: page,
       nextPage: hasNextPage ? nextPage : null,
     });
-    res.render("index", { locals, data });
   } catch (error) {
     console.log(error);
   }
 });
+
+// GET /
+// Post :id
 
 router.get("/post/:id", async (req, res) => {
   try {
@@ -42,13 +44,49 @@ router.get("/post/:id", async (req, res) => {
 
     const locals = {
       title: data.title,
-      description: "Simple Blog created with NodeJs, Express & MongoDb.",
+      description: "Simple Blog created with NodeJs, Express & MongoDB",
     };
 
     res.render("post", {
       locals,
       data,
       currentRoute: `/post/${slug}`,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// POST /
+// Post  - searchTerm
+
+router.post("/search", async (req, res) => {
+  try {
+    const locals = {
+      title: "Search",
+      description: "Simple Blog created with NodeJS, Express & MongoDB",
+    };
+
+    let searchTerm = req.body.searchTerm;
+    const searchNoSpecialChar = searchTerm.replace(/[^a-zA-Z0-9]/g, "");
+
+    const data = await Post.find({
+      $or: [
+        {
+          title: {
+            $regex: new RegExp(searchNoSpecialChar, "i"),
+          },
+        },
+        {
+          body: {
+            $regex: new RegExp(searchNoSpecialChar, "i"),
+          },
+        },
+      ],
+    });
+    res.render("search", {
+      data,
+      locals,
     });
   } catch (error) {
     console.log(error);
@@ -64,6 +102,7 @@ router.get("/contact", (req, res) => {
 });
 
 module.exports = router;
+
 // function insertPostData () {
 //   Post.insertMany([
 //     {
